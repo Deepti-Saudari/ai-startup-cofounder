@@ -1,30 +1,17 @@
-﻿<div align="center">
-  <img src="https://raw.githubusercontent.com/Deepti-Saudari/ai-startup-cofounder/main/public/banner.png" alt="AI Startup Co-founder Banner" width="100%"/>
-</div>
-
-<br/>
+﻿# 🚀 AI Startup Co-founder
 
 <div align="center">
+  <h1>🤖 AI Startup Co-founder</h1>
+  <h3>Your Virtual Business Partner | 13 Specialized AI Agents | From Idea to Launch</h3>
+  <br/>
   <img src="https://img.shields.io/badge/AI-Powered-blue" alt="AI Powered"/>
   <img src="https://img.shields.io/badge/Next.js-14.2.16-black" alt="Next.js"/>
   <img src="https://img.shields.io/badge/Python-3.13+-blue" alt="Python"/>
   <img src="https://img.shields.io/badge/FastAPI-0.104.1-green" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License"/>
   <img src="https://img.shields.io/github/stars/Deepti-Saudari/ai-startup-cofounder" alt="GitHub stars"/>
-</div>
-
-<br/>
-
-# 🚀 AI Startup Co-founder
-
-**Your Virtual Business Partner** - An intelligent platform that helps entrepreneurs from idea to launch with 13 specialized AI agents.
-# 🚀 AI Startup Co-founder
-
-<div align="center">
-  <img src="https://img.shields.io/badge/AI-Powered-blue" alt="AI Powered"/>
-  <img src="https://img.shields.io/badge/Next.js-14.2.16-black" alt="Next.js"/>
-  <img src="https://img.shields.io/badge/Python-3.13+-blue" alt="Python"/>
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License"/>
+  <br/>
+  <br/>
 </div>
 
 ## 📖 Overview
@@ -73,7 +60,7 @@
 
 ### 1. Clone the Repository
 \\\ash
-git clone https://github.com/YOUR_USERNAME/ai-startup-cofounder.git
+git clone https://github.com/Deepti-Saudari/ai-startup-cofounder.git
 cd ai-startup-cofounder
 \\\
 
@@ -103,16 +90,20 @@ cp .env.example .env
 # Add your Groq API key to .env
 \\\
 
+> ⚠️ **Important**: Never commit .env or .env.local files to version control!
+
 ### 5. Start Backend Server
 \\\ash
 cd backend
 uvicorn main:app --reload
 \\\
+Server runs at: http://127.0.0.1:8000
 
-### 6. Start Frontend
+### 6. Start Frontend Development Server
 \\\ash
 npm run dev
 \\\
+App runs at: http://localhost:3000
 
 ### 7. Open your browser
 \\\
@@ -123,32 +114,55 @@ http://localhost:3000
 
 \\\
 Project_Test-1/
-├── app/                    # Next.js pages
+├── app/                    # Next.js App Router pages
 ├── components/             # React components
+│   ├── idea-generator.tsx
+│   ├── pitch-deck.tsx
+│   └── ...
 ├── backend/                # FastAPI backend
 │   ├── agents/            # 13 AI agents
-│   ├── main.py
-│   └── requirements.txt
-├── README.md
-└── package.json
+│   │   ├── idea_agent.py
+│   │   ├── pitch_agent.py
+│   │   └── ...
+│   ├── main.py            # API endpoints
+│   ├── .env.example       # Template for API keys
+│   └── requirements.txt   # Python dependencies
+├── public/                 # Static assets
+├── .env.example           # Frontend env template
+├── .gitignore             # Git ignore rules
+├── README.md              # This file
+└── package.json           # Node dependencies
 \\\
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch: \git checkout -b feature/amazing-feature\
+3. Commit your changes: \git commit -m 'Add amazing feature'\
+4. Push to the branch: \git push origin feature/amazing-feature\
+5. Open a Pull Request
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- Built with [Groq](https://groq.com/)
+- Built with [Groq](https://groq.com/) for lightning-fast AI inference
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
 - Icons from [Lucide](https://lucide.dev/)
+
+## 📞 Contact
+
+- **Project Link**: [https://github.com/Deepti-Saudari/ai-startup-cofounder](https://github.com/Deepti-Saudari/ai-startup-cofounder)
+- **Report Issues**: [GitHub Issues](https://github.com/Deepti-Saudari/ai-startup-cofounder/issues)
 
 ---
 
 <div align="center">
-  Made with ❤️ for entrepreneurs building the future
+  <sub>Built with ❤️ for entrepreneurs worldwide</sub>
+  <br/>
+  <sub>Your AI co-founder is ready to help you build the next big thing 🚀</sub>
 </div>
