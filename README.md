@@ -1,5 +1,4 @@
-﻿@"
-# 🚀 AI Startup Co-founder
+﻿# 🚀 AI Startup Co-founder
 
 <p align="center">
   <img src="./public/banner.png" alt="Banner"/>
