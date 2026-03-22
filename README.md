@@ -1,4 +1,24 @@
-﻿# 🚀 AI Startup Co-founder
+﻿<div align="center">
+  <img src="https://raw.githubusercontent.com/Deepti-Saudari/ai-startup-cofounder/main/public/banner.png" alt="AI Startup Co-founder Banner" width="100%"/>
+</div>
+
+<br/>
+
+<div align="center">
+  <img src="https://img.shields.io/badge/AI-Powered-blue" alt="AI Powered"/>
+  <img src="https://img.shields.io/badge/Next.js-14.2.16-black" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/Python-3.13+-blue" alt="Python"/>
+  <img src="https://img.shields.io/badge/FastAPI-0.104.1-green" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License"/>
+  <img src="https://img.shields.io/github/stars/Deepti-Saudari/ai-startup-cofounder" alt="GitHub stars"/>
+</div>
+
+<br/>
+
+# 🚀 AI Startup Co-founder
+
+**Your Virtual Business Partner** - An intelligent platform that helps entrepreneurs from idea to launch with 13 specialized AI agents.
+# 🚀 AI Startup Co-founder
 
 <div align="center">
   <img src="https://img.shields.io/badge/AI-Powered-blue" alt="AI Powered"/>
