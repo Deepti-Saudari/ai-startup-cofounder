@@ -1,17 +1,15 @@
-﻿# 🚀 AI Startup Co-founder
+﻿@"
+# 🚀 AI Startup Co-founder
+
+<p align="center">
+  <img src="./public/banner.png" alt="Banner"/>
+</p>
 
 <div align="center">
-  <h1>🤖 AI Startup Co-founder</h1>
-  <h3>Your Virtual Business Partner | 13 Specialized AI Agents | From Idea to Launch</h3>
-  <br/>
-  <img src="https://img.shields.io/badge/AI-Powered-blue" alt="AI Powered"/>
-  <img src="https://img.shields.io/badge/Next.js-14.2.16-black" alt="Next.js"/>
-  <img src="https://img.shields.io/badge/Python-3.13+-blue" alt="Python"/>
-  <img src="https://img.shields.io/badge/FastAPI-0.104.1-green" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License"/>
-  <img src="https://img.shields.io/github/stars/Deepti-Saudari/ai-startup-cofounder" alt="GitHub stars"/>
-  <br/>
-  <br/>
+  <img src="https://img.shields.io/badge/AI-Powered-blue" />
+  <img src="https://img.shields.io/badge/Next.js-14.2.16-black" />
+  <img src="https://img.shields.io/badge/Python-3.13+-blue" />
+  <img src="https://img.shields.io/badge/License-MIT-green" />
 </div>
 
 ## 📖 Overview
@@ -48,7 +46,6 @@
 ### Backend
 - **Framework**: FastAPI (Python)
 - **AI Models**: Groq (Llama 3.3 70B)
-- **API**: RESTful endpoints
 
 ## 📋 Prerequisites
 
@@ -59,110 +56,84 @@
 ## 🚦 Getting Started
 
 ### 1. Clone the Repository
-\\\ash
-git clone https://github.com/Deepti-Saudari/ai-startup-cofounder.git
+\`\`\`bash
+git clone https://github.com/YOUR_USERNAME/ai-startup-cofounder.git
 cd ai-startup-cofounder
-\\\
+\`\`\`
 
 ### 2. Install Frontend Dependencies
-\\\ash
+\`\`\`bash
 npm install
-\\\
+\`\`\`
 
 ### 3. Install Backend Dependencies
-\\\ash
+\`\`\`bash
 cd backend
 pip install -r requirements.txt
 cd ..
-\\\
+\`\`\`
 
 ### 4. Configure Environment Variables
 
 **Frontend:**
-\\\ash
+\`\`\`bash
 cp .env.example .env.local
-\\\
+\`\`\`
 
 **Backend:**
-\\\ash
+\`\`\`bash
 cd backend
 cp .env.example .env
 # Add your Groq API key to .env
-\\\
+\`\`\`
 
-> ⚠️ **Important**: Never commit .env or .env.local files to version control!
-
-### 5. Start Backend Server
-\\\ash
+### 5. Start Backend
+\`\`\`bash
 cd backend
 uvicorn main:app --reload
-\\\
-Server runs at: http://127.0.0.1:8000
+\`\`\`
 
-### 6. Start Frontend Development Server
-\\\ash
+### 6. Start Frontend
+\`\`\`bash
 npm run dev
-\\\
-App runs at: http://localhost:3000
+\`\`\`
 
 ### 7. Open your browser
-\\\
+\`\`\`
 http://localhost:3000
-\\\
+\`\`\`
 
 ## 📁 Project Structure
 
-\\\
+\`\`\`
 Project_Test-1/
-├── app/                    # Next.js App Router pages
+├── app/                    # Next.js pages
 ├── components/             # React components
-│   ├── idea-generator.tsx
-│   ├── pitch-deck.tsx
-│   └── ...
 ├── backend/                # FastAPI backend
 │   ├── agents/            # 13 AI agents
-│   │   ├── idea_agent.py
-│   │   ├── pitch_agent.py
-│   │   └── ...
-│   ├── main.py            # API endpoints
-│   ├── .env.example       # Template for API keys
-│   └── requirements.txt   # Python dependencies
-├── public/                 # Static assets
-├── .env.example           # Frontend env template
-├── .gitignore             # Git ignore rules
-├── README.md              # This file
-└── package.json           # Node dependencies
-\\\
+│   ├── main.py
+│   └── requirements.txt
+├── README.md
+└── package.json
+\`\`\`
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch: \git checkout -b feature/amazing-feature\
-3. Commit your changes: \git commit -m 'Add amazing feature'\
-4. Push to the branch: \git push origin feature/amazing-feature\
-5. Open a Pull Request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+MIT License
 
 ## 🙏 Acknowledgments
 
-- Built with [Groq](https://groq.com/) for lightning-fast AI inference
+- Built with [Groq](https://groq.com/)
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
 - Icons from [Lucide](https://lucide.dev/)
-
-## 📞 Contact
-
-- **Project Link**: [https://github.com/Deepti-Saudari/ai-startup-cofounder](https://github.com/Deepti-Saudari/ai-startup-cofounder)
-- **Report Issues**: [GitHub Issues](https://github.com/Deepti-Saudari/ai-startup-cofounder/issues)
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ for entrepreneurs worldwide</sub>
-  <br/>
-  <sub>Your AI co-founder is ready to help you build the next big thing 🚀</sub>
+  Made with ❤️ for entrepreneurs building the future
 </div>
+"@ | Out-File -FilePath README.md -Encoding UTF8
