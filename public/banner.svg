@@ -1,0 +1,12 @@
+﻿<svg width="1200" height="400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="400" fill="url(#grad)"/>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <text x="600" y="180" font-size="48" font-family="Arial" text-anchor="middle" fill="white" font-weight="bold">AI Startup Co-founder</text>
+  <text x="600" y="260" font-size="24" font-family="Arial" text-anchor="middle" fill="#e0e7ff">13 AI Agents • From Idea to Launch</text>
+  <text x="600" y="320" font-size="18" font-family="Arial" text-anchor="middle" fill="#cbd5e1">Your Virtual Business Partner</text>
+</svg>
