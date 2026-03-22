@@ -1,0 +1,919 @@
+"use client"
+
+import React from "react" 
+import { useState, useRef, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+  Send,
+  Lightbulb,
+  TrendingUp,
+  Target,
+  DollarSign,
+  Users,
+  Zap,
+  Brain,
+  Sparkles,
+  Clock,
+  CheckCircle,
+  Loader2,
+  MessageSquare,
+  BookOpen,
+  Rocket,
+  Shield,
+  Globe,
+  BarChart,
+  FileText,
+  UserPlus,
+  Calendar,
+  AlertCircle,
+  ThumbsUp,
+  HelpCircle,
+  ChevronRight,
+  Mic,
+  Paperclip,
+  Smile,
+  Settings,
+  Menu,
+  X,
+  Copy,
+  Share2,
+  Download,
+  ExternalLink,
+  Briefcase,  // Add this
+} from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+
+// Types
+interface Message {
+  id: string
+  content: string
+  sender: "user" | "ai"
+  timestamp: Date
+  type?: "text" | "suggestion" | "action" | "error"
+  suggestions?: string[]
+  actions?: ChatAction[]
+  metadata?: {
+    tokens?: number
+    model?: string
+    latency?: number
+  }
+}
+
+interface ChatAction {
+  id: string
+  label: string
+  description: string
+  icon: React.ReactNode
+  href?: string
+  action?: () => void  // Add this line
+}
+
+interface ChatSession {
+  id: string
+  title: string
+  messages: Message[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Quick prompts with categories
+const QUICK_PROMPTS = [
+  {
+    icon: <Lightbulb className="w-5 h-5" />,
+    text: "Help me validate my startup idea",
+    category: "Validation",
+    color: "bg-yellow-100 text-yellow-700",
+  },
+  {
+    icon: <TrendingUp className="w-5 h-5" />,
+    text: "What should my go-to-market strategy be?",
+    category: "Strategy",
+    color: "bg-blue-100 text-blue-700",
+  },
+  {
+    icon: <DollarSign className="w-5 h-5" />,
+    text: "How should I price my product?",
+    category: "Pricing",
+    color: "bg-green-100 text-green-700",
+  },
+  {
+    icon: <Users className="w-5 h-5" />,
+    text: "When should I start hiring?",
+    category: "Team",
+    color: "bg-purple-100 text-purple-700",
+  },
+  {
+    icon: <Target className="w-5 h-5" />,
+    text: "Help me define my target market",
+    category: "Market",
+    color: "bg-red-100 text-red-700",
+  },
+  {
+    icon: <Zap className="w-5 h-5" />,
+    text: "What are the biggest risks?",
+    category: "Risk",
+    color: "bg-orange-100 text-orange-700",
+  },
+  {
+    icon: <Rocket className="w-5 h-5" />,
+    text: "How do I prepare for fundraising?",
+    category: "Funding",
+    color: "bg-indigo-100 text-indigo-700",
+  },
+  {
+    icon: <BookOpen className="w-5 h-5" />,
+    text: "Create a product roadmap",
+    category: "Product",
+    color: "bg-pink-100 text-pink-700",
+  },
+]
+
+// Action templates
+// Action templates with proper typing
+const ACTION_TEMPLATES: Record<string, ChatAction[]> = {
+  validation: [
+    {
+      id: "market-research",
+      label: "Run Market Research",
+      description: "Analyze your market and competitors",
+      icon: <BarChart className="w-4 h-4" />,
+      href: "/market",
+    },
+    {
+      id: "idea-generator",
+      label: "Refine Your Idea",
+      description: "Generate variations of your idea",
+      icon: <Lightbulb className="w-4 h-4" />,
+      href: "/ideas",
+    },
+    {
+      id: "customer-interviews",
+      label: "Customer Interview Script",
+      description: "Create interview questions",
+      icon: <Users className="w-4 h-4" />,
+      action: () => {
+        // This would trigger a modal or generate content
+        alert("Generating customer interview script...");
+      },
+    },
+  ],
+  strategy: [
+    {
+      id: "business-plan",
+      label: "Build Business Plan",
+      description: "Create comprehensive business plan",
+      icon: <FileText className="w-4 h-4" />,
+      href: "/business-plan",
+    },
+    {
+      id: "competitor-analysis",
+      label: "Competitor Analysis",
+      description: "Analyze your competition",
+      icon: <Target className="w-4 h-4" />,
+      href: "/market",
+    },
+  ],
+  pricing: [
+    {
+      id: "financial-model",
+      label: "Build Financial Model",
+      description: "Model different pricing scenarios",
+      icon: <DollarSign className="w-4 h-4" />,
+      href: "/financials",
+    },
+    {
+      id: "pricing-strategy",
+      label: "Pricing Strategy Guide",
+      description: "Detailed pricing framework",
+      icon: <Target className="w-4 h-4" />,
+      action: () => {
+        // This would open a pricing guide
+        alert("Opening pricing strategy guide...");
+      },
+    },
+  ],
+  funding: [
+    {
+      id: "pitch-deck",
+      label: "Create Pitch Deck",
+      description: "Build investor presentation",
+      icon: <Rocket className="w-4 h-4" />,
+      href: "/pitch-deck",
+    },
+    {
+      id: "investor-list",
+      label: "Find Investors",
+      description: "Generate investor target list",
+      icon: <Users className="w-4 h-4" />,
+      href: "/funding",
+    },
+  ],
+  team: [
+    {
+      id: "hiring-plan",
+      label: "Create Hiring Plan",
+      description: "Build team roadmap",
+      icon: <UserPlus className="w-4 h-4" />,
+      href: "/team",
+    },
+    {
+      id: "role-definitions",
+      label: "Define Key Roles",
+      description: "Create job descriptions",
+      icon: <Briefcase className="w-4 h-4" />,
+      action: () => {
+        // This would generate job descriptions
+        alert("Generating job descriptions...");
+      },
+    },
+  ],
+}
+
+// Context-aware response generator
+const generateContextualResponse = async (
+  message: string,
+  history: Message[],
+  setIsTyping: (typing: boolean) => void
+): Promise<Message> => {
+  try {
+    const API_URL = "http://127.0.0.1:8000"
+    const startTime = Date.now()
+
+    const response = await fetch(`${API_URL}/ai-cofounder`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: message,
+        context: {
+          history: history.slice(-5).map(m => ({
+            role: m.sender,
+            content: m.content
+          })),
+          timestamp: new Date().toISOString()
+        }
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const latency = Date.now() - startTime
+
+    // Extract suggestions from content or generate based on context
+    const suggestions = extractSuggestions(data.reply || data.response || data.message)
+    
+    // Determine relevant actions based on message content
+    const actions = getRelevantActions(message)
+
+    return {
+      id: Date.now().toString(),
+      content: data.reply || data.response || data.message || "I'm here to help!",
+      sender: "ai",
+      timestamp: new Date(),
+      type: "suggestion",
+      suggestions: suggestions,
+      actions: actions,
+      metadata: {
+        latency,
+        model: "llama-3.3-70b-versatile",
+      },
+    }
+  } catch (error) {
+    console.error("Error calling AI service:", error)
+    
+    // Fallback to enhanced local response
+    return generateFallbackResponse(message)
+  }
+}
+
+// Extract suggestions from AI response
+const extractSuggestions = (content: string): string[] => {
+  const suggestions: string[] = []
+  
+  // Look for bullet points or numbered lists
+  const bulletPoints = content.match(/[•\-*]\s*([^\n]+)/g)
+  if (bulletPoints) {
+    suggestions.push(...bulletPoints.map(b => b.replace(/[•\-*]\s*/, "").trim()).slice(0, 4))
+  }
+  
+  // Look for numbered items
+  const numberedItems = content.match(/\d+\.\s*([^\n]+)/g)
+  if (numberedItems) {
+    suggestions.push(...numberedItems.map(n => n.replace(/\d+\.\s*/, "").trim()).slice(0, 4))
+  }
+  
+  // If no suggestions found, generate generic ones
+  if (suggestions.length === 0) {
+    if (content.toLowerCase().includes("validation")) {
+      suggestions.push("Help me validate this", "Create validation plan", "Find early adopters")
+    } else if (content.toLowerCase().includes("pricing")) {
+      suggestions.push("Compare pricing models", "Calculate optimal price", "Test pricing")
+    } else {
+      suggestions.push("Tell me more", "Give me examples", "What's next?")
+    }
+  }
+  
+  return suggestions.slice(0, 5)
+}
+
+// Get relevant actions based on message content
+const getRelevantActions = (message: string): ChatAction[] => {
+  const lowerMessage = message.toLowerCase()
+  const actions: ChatAction[] = []
+
+  if (lowerMessage.includes("validate") || lowerMessage.includes("idea")) {
+    actions.push(...ACTION_TEMPLATES.validation.slice(0, 2))
+  }
+  if (lowerMessage.includes("strategy") || lowerMessage.includes("market")) {
+    actions.push(...ACTION_TEMPLATES.strategy.slice(0, 2))
+  }
+  if (lowerMessage.includes("price") || lowerMessage.includes("pricing")) {
+    actions.push(...ACTION_TEMPLATES.pricing.slice(0, 2))
+  }
+  if (lowerMessage.includes("fund") || lowerMessage.includes("invest")) {
+    actions.push(...ACTION_TEMPLATES.funding.slice(0, 2))
+  }
+  if (lowerMessage.includes("hire") || lowerMessage.includes("team")) {
+    actions.push(...ACTION_TEMPLATES.team.slice(0, 2))
+  }
+
+  return actions
+}
+
+// Enhanced fallback response generator
+const generateFallbackResponse = (message: string): Message => {
+  const lowerMessage = message.toLowerCase()
+  let content = ""
+  let suggestions: string[] = []
+  let actions: ChatAction[] = []
+
+  if (lowerMessage.includes("validate") || lowerMessage.includes("idea")) {
+    content = `Great question about validation! Here's my systematic approach:
+
+## 🔍 Problem Validation
+- **Customer Interviews**: Talk to 15-20 potential customers
+- **Pain Quantification**: How much time/money does this problem cost?
+- **Frequency Check**: How often does this problem occur?
+
+## 💡 Solution Validation
+- **MVP Creation**: Build a simple prototype
+- **User Testing**: Get feedback from 10-15 users
+- **Engagement Metrics**: Track usage patterns
+
+## 📊 Market Validation
+- **Market Sizing**: TAM, SAM, SOM analysis
+- **Competitor Analysis**: Identify gaps and opportunities
+- **Value Proposition**: Define your unique advantage
+
+## 💰 Business Model Validation
+- **Pricing Tests**: Test different price points
+- **Unit Economics**: Calculate LTV/CAC ratio
+- **Revenue Projections**: Build financial model
+
+Would you like me to help you create a validation plan for your specific idea?`
+
+    suggestions = [
+      "Create interview script",
+      "Design MVP test",
+      "Analyze competition",
+      "Calculate market size",
+      "Build financial model",
+    ]
+    
+    actions = ACTION_TEMPLATES.validation
+
+  } else if (lowerMessage.includes("strategy") || lowerMessage.includes("market")) {
+    content = `Excellent question about go-to-market strategy! Here's a comprehensive framework:
+
+## 🎯 Define Your ICP (Ideal Customer Profile)
+- **Demographics**: Industry, company size, location
+- **Psychographics**: Goals, challenges, behaviors
+- **Buying Process**: Decision makers, timeline, budget
+
+## 🚀 Choose Your GTM Motion
+| Motion Type | Best For | Examples |
+|------------|----------|----------|
+| **Product-Led** | Self-service, low-touch | Slack, Dropbox |
+| **Sales-Led** | Enterprise, high-touch | Salesforce, Snowflake |
+| **Marketing-Led** | Content-driven | HubSpot, Moz |
+
+## 📢 Channel Selection
+- **Direct**: Website, sales team, events
+- **Digital**: SEO, content, paid ads
+- **Partners**: Resellers, integrations
+
+## ✍️ Messaging Framework
+1. **Problem**: What pain do you solve?
+2. **Solution**: How do you solve it?
+3. **Proof**: Why should they believe you?
+4. **ROI**: What value do they get?
+
+What type of business are you building? I can help you create a tailored strategy.`
+
+    suggestions = [
+      "Define my ICP",
+      "Choose GTM motion",
+      "Create messaging",
+      "Select channels",
+      "Set success metrics",
+    ]
+    
+    actions = ACTION_TEMPLATES.strategy
+
+  } else if (lowerMessage.includes("price") || lowerMessage.includes("pricing")) {
+    content = `Pricing strategy is crucial! Here's my comprehensive approach:
+
+## 📊 Value-Based Pricing Framework
+
+### 1. Understand Your Value
+- Quantify time saved for customers
+- Calculate revenue generated
+- Measure cost reduction
+- Compare to alternatives
+
+### 2. Pricing Models Comparison
+
+| Model | Best For | Example |
+|-------|----------|---------|
+| **Usage-based** | API services | Stripe ($0.30 + 2.9%) |
+| **Subscription** | SaaS products | Netflix ($15.49/mo) |
+| **Tiered** | Feature differentiation | Slack ($8.75/user) |
+| **Freemium** | User acquisition | Dropbox (2GB free) |
+
+### 3. Psychological Tactics
+- **Price Anchoring**: Show expensive option first
+- **Decoy Effect**: Make target plan attractive
+- **Charm Pricing**: $9.99 vs $10.00
+
+### 4. Testing Strategy
+- A/B test price points
+- Survey willingness to pay
+- Monitor conversion rates
+- Track churn by price tier
+
+What's your current pricing model? I can help you optimize it.`
+
+    suggestions = [
+      "Choose pricing model",
+      "Calculate price points",
+      "Design pricing tiers",
+      "Run pricing tests",
+      "Analyze competitors",
+    ]
+    
+    actions = ACTION_TEMPLATES.pricing
+
+  } else {
+    content = `Thanks for your question! Based on my experience helping founders, here are key considerations:
+
+## 🎯 Key Insights
+- Focus on solving one problem exceptionally well
+- Validate assumptions before scaling
+- Track metrics that matter (not vanity metrics)
+- Build relationships with customers early
+
+## 💡 Strategic Advice
+1. **Start with customer discovery**: Talk to 20+ potential users
+2. **Build an MVP**: Launch something simple to learn
+3. **Iterate based on feedback**: Let customers guide your roadmap
+4. **Measure what matters**: Focus on retention, not just acquisition
+
+## 📋 Next Steps
+- Define your core hypothesis
+- Create a validation plan
+- Build a simple prototype
+- Get feedback from 5-10 users
+
+Would you like me to dive deeper into any specific area? I can help you create action plans and connect you with relevant tools in our platform.`
+
+    suggestions = [
+      "Help me validate",
+      "Create action plan",
+      "Analyze competition",
+      "Build financial model",
+      "Create pitch deck",
+    ]
+  }
+
+  return {
+    id: Date.now().toString(),
+    content,
+    sender: "ai",
+    timestamp: new Date(),
+    type: "suggestion",
+    suggestions,
+    actions,
+    metadata: {
+      model: "fallback",
+      latency: 0,
+    },
+  }
+}
+
+// Main Component
+export const AICoFounder = () => {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
+      content: `# 👋 Welcome to Your AI Co-Founder!
+
+I'm here to help you build and scale your startup. Think of me as your strategic partner who can help with:
+
+## 🚀 What I Can Help With
+
+### **Strategy & Planning**
+- Business model validation
+- Go-to-market strategy
+- Competitive analysis
+- Product roadmap planning
+
+### **Product Development**
+- Feature prioritization
+- User research methods
+- MVP definition
+- Product-market fit
+
+### **Fundraising**
+- Pitch deck feedback
+- Financial modeling
+- Investor outreach
+- Term sheet analysis
+
+### **Operations**
+- Team building
+- Legal & compliance
+- Process optimization
+- Growth strategies
+
+## 💡 How to Get Started
+
+Just ask me anything about your startup! For example:
+- "Help me validate my SaaS idea"
+- "What's a good pricing strategy?"
+- "How do I find product-market fit?"
+- "When should I start fundraising?"
+
+**What would you like to work on today?**`,
+      sender: "ai",
+      timestamp: new Date(),
+      type: "text",
+    },
+  ])
+  
+  const [inputValue, setInputValue] = useState("")
+  const [isTyping, setIsTyping] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [sessions, setSessions] = useState<ChatSession[]>([
+    {
+      id: "1",
+      title: "Current Chat",
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+  ])
+  const [currentSessionId, setCurrentSessionId] = useState("1")
+  
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+    }
+  }, [messages])
+
+  // Focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  // Send message
+  const sendMessage = async (content: string) => {
+    if (!content.trim() || isTyping) return
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: content.trim(),
+      sender: "user",
+      timestamp: new Date(),
+      type: "text",
+    }
+
+    setMessages((prev) => [...prev, userMessage])
+    setInputValue("")
+    setIsTyping(true)
+
+    try {
+      const aiResponse = await generateContextualResponse(content, messages, setIsTyping)
+      setMessages((prev) => [...prev, aiResponse])
+    } catch (error) {
+      console.error("Error getting response:", error)
+      const errorMessage: Message = {
+        id: Date.now().toString(),
+        content: "I'm having trouble connecting. Please try again in a moment.",
+        sender: "ai",
+        timestamp: new Date(),
+        type: "error",
+      }
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
+      setIsTyping(false)
+    }
+  }
+
+  // Handle quick prompt
+  const handleQuickPrompt = (prompt: string) => {
+    sendMessage(prompt)
+  }
+
+  // Handle suggestion
+  const handleSuggestion = (suggestion: string) => {
+    sendMessage(suggestion)
+  }
+
+  // Copy message to clipboard
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+    // Could add a toast notification here
+  }
+
+  // New chat session
+  const newChat = () => {
+    const newSession: ChatSession = {
+      id: Date.now().toString(),
+      title: `Chat ${sessions.length + 1}`,
+      messages: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    setSessions([...sessions, newSession])
+    setCurrentSessionId(newSession.id)
+    setMessages([])
+  }
+
+  // Format timestamp
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  }
+
+  return (
+    <div className="flex h-[calc(100vh-4rem)] gap-4 p-4">
+      {/* Mobile Sidebar Toggle */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="lg:hidden fixed top-20 left-4 z-50"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </Button>
+
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed lg:static inset-y-0 left-0 z-40 w-80 bg-background border-r
+          transform transition-transform duration-200 ease-in-out
+          ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0
+        `}
+      >
+        <div className="flex flex-col h-full">
+          <div className="p-4 border-b">
+            <Button onClick={newChat} className="w-full">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              New Chat
+            </Button>
+          </div>
+
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {/* Quick Prompts */}
+              <div>
+                <h3 className="text-sm font-medium mb-3">Quick Prompts</h3>
+                <div className="space-y-2">
+                  {QUICK_PROMPTS.map((prompt, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      className="w-full justify-start h-auto p-2 text-left"
+                      onClick={() => handleQuickPrompt(prompt.text)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`p-1.5 rounded ${prompt.color}`}>{prompt.icon}</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{prompt.text}</p>
+                          <Badge variant="outline" className="text-xs mt-1">
+                            {prompt.category}
+                          </Badge>
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Chat History */}
+              <div>
+                <h3 className="text-sm font-medium mb-3">Recent Chats</h3>
+                <div className="space-y-1">
+                  {sessions.map((session) => (
+                    <Button
+                      key={session.id}
+                      variant={currentSessionId === session.id ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => {
+                        setCurrentSessionId(session.id)
+                        setMessages(session.messages)
+                        setIsSidebarOpen(false)
+                      }}
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      <span className="truncate">{session.title}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+
+          <div className="p-4 border-t">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Brain className="w-4 h-4" />
+              <span>AI Co-Founder v2.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <Card className="flex-1 flex flex-col">
+          <CardHeader className="pb-3 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    <Brain className="w-5 h-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <CardTitle className="text-lg">AI Co-Founder</CardTitle>
+                  <CardDescription className="flex items-center gap-1">
+                    <div className={`w-2 h-2 rounded-full ${isTyping ? "bg-yellow-500 animate-pulse" : "bg-green-500"}`} />
+                    {isTyping ? "Thinking..." : "Online and ready to help"}
+                  </CardDescription>
+                </div>
+              </div>
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                Powered by Groq
+              </Badge>
+            </div>
+          </CardHeader>
+
+          <Separator />
+
+         {/* Messages */}
+         {/* Messages */}
+<ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+  <div className="space-y-4 max-w-3xl mx-auto">
+    {messages.map((message) => (
+      <div key={message.id} className={`flex gap-3 ${message.sender === "user" ? "justify-end" : ""}`}>
+        {message.sender === "ai" && (
+          <Avatar className="w-8 h-8 flex-shrink-0">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+              <Brain className="w-4 h-4" />
+            </AvatarFallback>
+          </Avatar>
+        )}
+        
+        <div className={`flex-1 max-w-[85%] ${message.sender === "user" ? "order-first" : ""}`}>
+          {/* Message Bubble */}
+          <div
+            className={`rounded-lg p-4 ${
+              message.sender === "user"
+                ? "bg-primary text-primary-foreground"
+                : message.type === "error"
+                ? "bg-destructive/10 text-destructive border border-destructive/20"
+                : "bg-muted text-foreground"
+            }`}
+          >
+            {message.sender === "ai" ? (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className="prose prose-sm max-w-none dark:prose-invert"
+                components={{
+                  h1: ({ children }) => <h1 className="text-xl font-bold mt-4 mb-2">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-lg font-semibold mt-3 mb-2">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-base font-medium mt-2 mb-1">{children}</h3>,
+                  p: ({ children }) => <p className="text-sm leading-relaxed mb-2">{children}</p>,
+                  ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-2">{children}</ul>,
+                  li: ({ children }) => <li className="text-sm">{children}</li>,
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
+            ) : (
+              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            )}
+          </div>
+
+          {/* Copy Button */}
+          {message.sender === "ai" && (
+            <div className="flex justify-end mt-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs"
+                onClick={() => copyToClipboard(message.content)}
+              >
+                <Copy className="w-3 h-3 mr-1" />
+                Copy
+              </Button>
+            </div>
+          )}
+
+          {/* Suggestions */}
+          {message.suggestions && message.suggestions.length > 0 && (
+            <div className="mt-3 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <Lightbulb className="w-3 h-3" />
+                Suggested follow-ups:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {message.suggestions.map((suggestion, idx) => (
+                  <Button
+                    key={idx}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-7"
+                    onClick={() => handleSuggestion(suggestion)}
+                  >
+                    {suggestion}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {message.sender === "user" && (
+          <Avatar className="w-8 h-8 flex-shrink-0">
+            <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
+              U
+            </AvatarFallback>
+          </Avatar>
+        )}
+      </div>
+    ))}
+  </div>
+</ScrollArea>
+
+              
+
+          <Separator />
+
+          {/* Input Area */}
+          <div className="p-4 flex-shrink-0">
+            <div className="flex gap-2 max-w-3xl mx-auto">
+              <Input
+                ref={inputRef}
+                placeholder="Ask your AI co-founder anything..."
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && sendMessage(inputValue)}
+                disabled={isTyping}
+                className="flex-1"
+              />
+              <Button 
+                onClick={() => sendMessage(inputValue)} 
+                disabled={!inputValue.trim() || isTyping}
+                size="icon"
+              >
+                {isTyping ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              AI Co-Founder can make mistakes. Verify important information.
+            </p>
+          </div>
+        </Card>
+      </div>
+    </div>
+  )
+}
